@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2021, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2022 Qualcomm Innovation Center, Inc. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
@@ -34,6 +35,7 @@
 #include <string.h>
 #include <thread>
 #include <linux/input.h>
+#include <linux/slatecom_interface.h>
 #include <log/log.h>
 #include <fcntl.h>
 #include <cutils/log.h>
@@ -56,12 +58,6 @@ namespace vibrator {
 #define UEVENT_MSG_LEN              1024
 #define SLATE_EVENT "SLATE_EVENT="
 #define SLATE_EVENT_STRING_LEN      12 //length of SLATE_EVENT
-/*
- * TODO Need to work on solution to get this from kernel header
- * without effecting other kernel versions where this change
- * goes in.
- */
-#define SLATE_AFTER_POWER_UP        4
 
 PatternOffload::PatternOffload()
 {
@@ -86,7 +82,7 @@ void PatternOffload::SSREventListener(void)
     }
 
     while ((n = uevent_kernel_multicast_recv(device_fd, msg, UEVENT_MSG_LEN)) > 0) {
-         if (n <= 0 || n >= UEVENT_MSG_LEN) {
+         if (n <= 0 || n > UEVENT_MSG_LEN) {
             ALOGE("Message length %d is not correct\n", n);
             continue;
          }
